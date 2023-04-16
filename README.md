@@ -1,2 +1,2 @@
-# topDown_WebShooterGame
+# topDownShooterGame_PhaserJS
 PhaserJS Study Project
