@@ -8,6 +8,9 @@
       (3) 적 AI의 시야에 플레이어가 들어오면 공격
 */
 /* 2. 버그
+      (1) 처음 로딩시 캐릭터와 캐릭터가 겹침.
+      (2) 칼의 빨간 히트박스가 적에 닿아도, 로그가 찍히지 않음.
+      (3) 칼을 한번만 휘두르고 더이상 A키를 눌러도 작동되지 않음.
 */
 // Set up the game configuration
 const config = {
@@ -33,6 +36,7 @@ const config = {
   let game = new Phaser.Game(config);
 
   let player;
+  let enemy;
   let bullets;
   let currentAngle;
   let currentVelocity;
@@ -45,8 +49,12 @@ const config = {
   //knife 상태 변수
   let doingKnifeAttack = false;
   let isPlayingKnifeAttackAnimation = false;
+  //knife 히트박스
+  let hitBox;
 
   let keyboard;
+
+
 
   /*let bulletPool = this.physics.add.group({
     classType: Bullet,
@@ -73,13 +81,17 @@ const config = {
     
     // Create the player character
     //player = this.physics.add.image(400, 300, 'player').setAngle(180);
-    player = this.physics.add.sprite(400, 300, 'player').setAngle(180);
+    player = this.physics.add.sprite(450, 320, 'player').setAngle(180);
   
     // Create the enemies
-    this.enemies = this.physics.add.group();
+    enemy = this.physics.add.sprite(200, 100, 'enemy').setAngle(180);
+    enemy.body.setAllowGravity(false);
+    //this.enemies = this.physics.add.group();
     
+    
+
     // Set the ememy
-   /* let x = Phaser.Math.Between(100, 700);
+    /*let x = Phaser.Math.Between(100, 700);
     let y = Phaser.Math.Between(100, 500);
     let enemy = this.physics.add.image(x, y, 'enemy');*/
 
@@ -91,10 +103,24 @@ const config = {
       repeat: 0
     });
 
+    // 칼 휘두를 때 히트박스 생성
+    // hitBox 객체 생성
+    console.log(this);
+
+    //const hitBox = this.add.rectangle(player.x + 20, player.y + 20, 20, 20, 0xff0000, 0.5);
+    hitBox = new Phaser.Geom.Rectangle(0, 0, 220,100, 0xff0000, 1);
+    this.physics.add.existing(hitBox);
+    hitBox.body.setAllowGravity(false);
+    hitBox.body.moves = false;
+
+    
+
+    //this.hitBox.setFillStyle(0xff0000, 0.5);
+
     // enemy Knifee Attack Animation
-    this.enemy = this.physics.add.sprite(300,200);
+    
     //enemy.setScale(1);
-   // this.enemies.add(enemy);
+    //this.enemies.add(enemy);
 
     
     // Set up the player's controls
@@ -121,7 +147,7 @@ const config = {
     //총알 발사 가능유무
     canFire = true;
 
-
+    //총알과 게임맵 끝자락이 충돌시
     this.physics.world.on('worldbounds', function (body) {
         if (body.gameObject instanceof Phaser.GameObjects.Image) {
             //console.log(body.gameObject);
@@ -133,11 +159,18 @@ const config = {
 
     // 충돌처리 등록
     //this.physics.add.collider(this.enemy, player);
-
-    this.physics.add.collider(this.enemy,player,(enemy,player)=>{
+    //적과 플레이어가 충돌시
+   this.physics.add.collider(enemy,player,(enemy,player)=>{
       //console.log("collide?");
-      this.enemy.body.stop();
+      enemy.body.stop();
       player.body.stop();
+    });
+
+    
+    // 여기에서 hitBox와 적의 충돌을 감지하는 로직을 추가합니다.
+    this.physics.add.collider(hitBox, enemy, () => {
+      // hitBox가 다른 물체와 충돌했을 때 실행되는 코드
+      console.log("hitBox collided with otherObject");
     });
   }
   
@@ -260,9 +293,12 @@ const config = {
     }
     //this.aKey.checkDown(this.aKey, 500)
     if (this.aKey.isDown) {
+      console.log(doingKnifeAttack);
       if (!doingKnifeAttack) { // 애니메이션 실행 중이 아닐 때만 실행
+        doingKnifeAttack = true;
         player.anims.play('knifeAttack');
         isPlayingKnifeAttackAnimation = true;
+
         player.on('animationcomplete-knifeAttack', () => {
           console.log('animationcomplete-knifeAttack');
           doingKnifeAttack = false;
@@ -270,15 +306,17 @@ const config = {
         });
       }else {
         // 애니메이션 실행 중일 때만 충돌 감지 네모형태 히트박스 생성
-        const hitBox = this.add.rectangle(player.x + offsetX, player.y + offsetY, width, height, 0xff0000, 0.5);
-        this.physics.add.existing(hitBox);
-        hitBox.body.setAllowGravity(false);
-        hitBox.body.moves = false;
-        // 여기에서 hitBox와 적의 충돌을 감지하는 로직을 추가합니다.
-        // ...
+        // hitBox의 위치를 업데이트합니다.
+        hitBox.setPosition(player.x -110, player.y - 120);
+
+        //히트박스를 시각적으로 나타내줍니다.
+        let graphics = this.add.graphics();
+        graphics.fillStyle(0xff0000, 0.5);
+        graphics.fillRectShape(hitBox);
       }
     }
 
+    
     // Check for bullet-enemy collisions
     this.physics.add.collider(bullets, this.enemies, (bullet, enemy) => {
       bullet.destroy();
