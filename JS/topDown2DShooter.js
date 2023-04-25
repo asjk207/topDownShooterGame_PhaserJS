@@ -9,7 +9,7 @@
 */
 /* 2. 버그
       (1) 처음 로딩시 캐릭터와 캐릭터가 겹침.
-      (2) 칼의 빨간 히트박스가 적에 닿아도, 로그가 찍히지 않음.
+      (2) 히트박스의 위치가 고정되어짐. (다른 위치에서 A키를 눌러도 빨간색 히트박스가 이동하지 않는다.)
       (3) 칼을 한번만 휘두르고 더이상 A키를 눌러도 작동되지 않음.
 */
 // Set up the game configuration
@@ -54,7 +54,7 @@ const config = {
 
   let keyboard;
 
-
+  let graphics;
 
   /*let bulletPool = this.physics.add.group({
     classType: Bullet,
@@ -105,13 +105,17 @@ const config = {
 
     // 칼 휘두를 때 히트박스 생성
     // hitBox 객체 생성
-    console.log(this);
-
     //const hitBox = this.add.rectangle(player.x + 20, player.y + 20, 20, 20, 0xff0000, 0.5);
-    hitBox = new Phaser.Geom.Rectangle(0, 0, 220,100, 0xff0000, 1);
+    /*hitBox = new Phaser.GameObjects.Rectangle(this.scene,0, 0, 220,100, 0xff0000, 1);
     this.physics.add.existing(hitBox);
     hitBox.body.setAllowGravity(false);
-    hitBox.body.moves = false;
+    hitBox.body.moves = false;*/
+
+    graphics = this.add.graphics();
+    graphics.fillStyle(0xff0000, 1);
+    graphics.fillRect(0, 0, 220, 100);
+    hitBox = this.physics.add.sprite(10, 10, graphics.generateTexture());
+    //graphics.destroy();
 
     
 
@@ -160,23 +164,25 @@ const config = {
     // 충돌처리 등록
     //this.physics.add.collider(this.enemy, player);
     //적과 플레이어가 충돌시
-   this.physics.add.collider(enemy,player,(enemy,player)=>{
-      //console.log("collide?");
+   /*this.physics.add.collider(enemy,player,(enemy,player)=>{
+      console.log("collide PLAYER AND ENEMY");
       enemy.body.stop();
       player.body.stop();
-    });
+    });*/
 
     
     // 여기에서 hitBox와 적의 충돌을 감지하는 로직을 추가합니다.
-    this.physics.add.collider(hitBox, enemy, () => {
+    this.physics.add.collider(enemy,hitBox, (enemy,hitBox ) => {
       // hitBox가 다른 물체와 충돌했을 때 실행되는 코드
-      console.log("hitBox collided with otherObject");
+      console.log("collide HITBOX AND ENEMY");
     });
   }
   
   // Update the game world
   function update() {
-    
+    console.log(graphics);
+    //console.log(enemy);
+    //console.log(player);
     // 플레이어 이동 제어.
     // Update the player's movement
     player.setVelocity(0);
@@ -293,14 +299,14 @@ const config = {
     }
     //this.aKey.checkDown(this.aKey, 500)
     if (this.aKey.isDown) {
-      console.log(doingKnifeAttack);
+      //console.log(doingKnifeAttack);
       if (!doingKnifeAttack) { // 애니메이션 실행 중이 아닐 때만 실행
         doingKnifeAttack = true;
         player.anims.play('knifeAttack');
         isPlayingKnifeAttackAnimation = true;
 
         player.on('animationcomplete-knifeAttack', () => {
-          console.log('animationcomplete-knifeAttack');
+          //console.log('animationcomplete-knifeAttack');
           doingKnifeAttack = false;
           player.anims.stop('knifeAttack');
         });
@@ -308,11 +314,6 @@ const config = {
         // 애니메이션 실행 중일 때만 충돌 감지 네모형태 히트박스 생성
         // hitBox의 위치를 업데이트합니다.
         hitBox.setPosition(player.x -110, player.y - 120);
-
-        //히트박스를 시각적으로 나타내줍니다.
-        let graphics = this.add.graphics();
-        graphics.fillStyle(0xff0000, 0.5);
-        graphics.fillRectShape(hitBox);
       }
     }
 
