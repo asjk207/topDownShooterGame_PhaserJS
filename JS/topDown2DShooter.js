@@ -2,15 +2,11 @@
 
 // 최근 진행상황
 /* 1. 작업 목표
-      (1) 칼 휘두르는 범위 충돌 감지 (진행 중)
-          -> 칼을 휘두를 때만, 충돌감지 하도록 수정.
-      (2) 적 AI 충돌감지 및 겹치지 않게
-      (3) 적 AI의 시야에 플레이어가 들어오면 공격
+      (1) 버그 1 해결하기.
+      (2) 강화학습 에이젼트가 이동하고 칼을 휘두르게 하기.
 */
 /* 2. 버그
-      (1) 처음 로딩시 캐릭터와 캐릭터가 겹침.
-      (2) 히트박스의 위치가 고정되어짐. (다른 위치에서 A키를 눌러도 빨간색 히트박스가 이동하지 않는다.)
-      (3) 칼을 한번만 휘두르고 더이상 A키를 눌러도 작동되지 않음.
+      (1) 칼을 한번만 휘두르고 더이상 A키를 눌러도 작동되지 않음.
 */
 // Set up the game configuration
 const config = {
@@ -67,7 +63,7 @@ const config = {
     //console.log(this);
     //console.log(game);
     this.load.image('player', 'assets/player.png');
-    this.load.image('enemy', 'assets/enemy.png');
+    this.load.image('enemy', 'assets/enemy_fix.png');
     this.load.image('bullet', 'assets/Top_Down_Survivor/Top_Down_Survivor/rifle/rifle-bullet.png');
     for(var i=0; i < 20; i++){
         this.load.image('player-move_rifle_'+i, 'assets/Top_Down_Survivor/Top_Down_Survivor/rifle/move/survivor-move_rifle_'+i+'.png');
@@ -84,7 +80,7 @@ const config = {
     player = this.physics.add.sprite(450, 320, 'player').setAngle(180);
   
     // Create the enemies
-    enemy = this.physics.add.sprite(200, 100, 'enemy').setAngle(180);
+    enemy = this.physics.add.sprite(500, 500, 'enemy').setAngle(180);
     enemy.body.setAllowGravity(false);
     //this.enemies = this.physics.add.group();
     
@@ -111,12 +107,22 @@ const config = {
     hitBox.body.setAllowGravity(false);
     hitBox.body.moves = false;*/
 
-    graphics = this.add.graphics();
-    graphics.fillStyle(0xff0000, 1);
-    graphics.fillRect(0, 0, 220, 100);
-    hitBox = this.physics.add.sprite(10, 10, graphics.generateTexture());
-    //graphics.destroy();
+   /* hitBox = this.add.sprite(10, 10, 'coloredRect');
+    hitBox.setOrigin(0, 0);*/
 
+    graphics = this.add.graphics();
+    //graphics.fillStyle(0xff0000, 1);
+    graphics.fillRect(0, 0, 220, 100);
+   
+    //generateTexture는 Graphics 객체가 변경되도 업데이트 되지 않는다.
+    //generateCanvasTexture는 Graphics 객체가 변경되면 업데이트 한다.
+    console.log(graphics);
+    hitBox = this.physics.add.sprite(10, 10, graphics.generateTexture());
+    hitBox.setAlpha(0);
+    //graphics.destroy();
+    
+
+    //graphics.generateTexture('coloredRect', 220, 100);
     
 
     //this.hitBox.setFillStyle(0xff0000, 0.5);
@@ -164,23 +170,23 @@ const config = {
     // 충돌처리 등록
     //this.physics.add.collider(this.enemy, player);
     //적과 플레이어가 충돌시
-   /*this.physics.add.collider(enemy,player,(enemy,player)=>{
+    this.physics.add.collider(enemy,player,(enemy,player)=>{
       console.log("collide PLAYER AND ENEMY");
       enemy.body.stop();
       player.body.stop();
-    });*/
+    });
 
     
     // 여기에서 hitBox와 적의 충돌을 감지하는 로직을 추가합니다.
-    this.physics.add.collider(enemy,hitBox, (enemy,hitBox ) => {
+    /*this.physics.overlap(enemy,hitBox, (enemy,hitBox ) => {
       // hitBox가 다른 물체와 충돌했을 때 실행되는 코드
       console.log("collide HITBOX AND ENEMY");
-    });
+    });*/
   }
   
   // Update the game world
   function update() {
-    console.log(graphics);
+    //console.log(graphics);
     //console.log(enemy);
     //console.log(player);
     // 플레이어 이동 제어.
@@ -313,7 +319,14 @@ const config = {
       }else {
         // 애니메이션 실행 중일 때만 충돌 감지 네모형태 히트박스 생성
         // hitBox의 위치를 업데이트합니다.
-        hitBox.setPosition(player.x -110, player.y - 120);
+        //hitBox.setPosition(player.x -110, player.y - 120);
+        hitBox.x = player.x -110;
+        hitBox.y = player.y -120;
+        graphics.generateTexture();
+        this.physics.overlap(enemy,hitBox, (enemy,hitBox ) => {
+          // hitBox가 다른 물체와 충돌했을 때 실행되는 코드
+          console.log("overlap HITBOX AND ENEMY");
+        });
       }
     }
 
