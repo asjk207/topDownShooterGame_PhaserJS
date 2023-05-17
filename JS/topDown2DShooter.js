@@ -2,9 +2,7 @@
 
 // 최근 진행상황
 /* 1. 작업 목표
-      (2) 칼을 4방향으로 휘두르고, 히트박스를 4방향으로 생성하기.
-          -> 전역으로 생성한 knifeHitBoxCalculatePosition 객체의 내부 변수가 변경되지 않는것처럼 보여진다.
-      (3) 강화학습 에이젼트가 이동하고 칼을 휘두르게 하기.
+      (1) 강화학습 에이젼트가 이동하고 칼을 휘두르게 하기.
 */
 /* 2. 버그
       
@@ -132,9 +130,9 @@ const config = {
    
     //generateTexture는 Graphics 객체가 변경되도 업데이트 되지 않는다.
     //generateCanvasTexture는 Graphics 객체가 변경되면 업데이트 한다.
-    console.log(graphics);
+    //console.log(graphics);
     knifeHitBox = this.physics.add.sprite(10, 10, graphics.generateTexture());
-    knifeHitBox.setAlpha(0);
+    //knifeHitBox.setAlpha(0);
     //graphics.destroy();
     
 
@@ -213,6 +211,10 @@ const config = {
     if (this.cursorKeys.left.isDown) {
       currentAngle = 180;
       currentVelocity = -250;
+
+      // 칼 히트박스 위치
+      knifeHitBoxCalculatePosition.xPos = -150;
+      knifeHitBoxCalculatePosition.yPos = -20;
       
       // 플레이어가 움직이는 방향과 속도
       player.setAngle(currentAngle);
@@ -227,6 +229,10 @@ const config = {
       currentAngle = 0;
       currentVelocity = 250;
 
+      // 칼 히트박스 위치
+      knifeHitBoxCalculatePosition.xPos = 150;
+      knifeHitBoxCalculatePosition.yPos = 20;
+
       player.setAngle(currentAngle);
       bulletAngle = currentAngle;
       
@@ -238,6 +244,10 @@ const config = {
     if (this.cursorKeys.up.isDown) {
       currentAngle = 270;
       currentVelocity = -250;
+
+      // 칼 히트박스 위치
+      knifeHitBoxCalculatePosition.xPos = -110;
+      knifeHitBoxCalculatePosition.yPos = -120;
   
       player.setAngle(currentAngle);
       bulletAngle = currentAngle;
@@ -249,7 +259,11 @@ const config = {
     } else if (this.cursorKeys.down.isDown) {
       currentAngle = 90;
       currentVelocity = 250;
-  
+
+      // 칼 히트박스 위치
+      knifeHitBoxCalculatePosition.xPos = 110;
+      knifeHitBoxCalculatePosition.yPos = 120;
+
       player.setAngle(currentAngle);
       bulletAngle = currentAngle;
       
@@ -278,12 +292,9 @@ const config = {
         yPos:-50
       }
 
-      
       // 총알 이미지의 각도가 바뀌지 않는다 왜??
       if(this.currentPlayerDirection=='up' || this.currentPlayerDirection=='down') {
         if(this.currentPlayerDirection=='up' ){
-            knifeHitBoxCalculatePosition.xPos = -110;
-            knifeHitBoxCalculatePosition.yPos = -120;
             gunMuzzleDirection.xPos = 50;
             gunMuzzleDirection.yPos = -130;
             bullet = this.physics.add.image((player.x+gunMuzzleDirection.xPos), (player.y+gunMuzzleDirection.yPos), 'bullet').setDisplaySize(50, 50).setAngle(bulletAngle);
@@ -291,8 +302,6 @@ const config = {
             bullets.add(bullet);
             bullet.setVelocityY(-700);
         }else if(this.currentPlayerDirection=='down' ){
-            knifeHitBoxCalculatePosition.xPos = 110;
-            knifeHitBoxCalculatePosition.yPos = 120;
             gunMuzzleDirection.xPos = -50;
             gunMuzzleDirection.yPos = 130;
             bullet = this.physics.add.image((player.x+gunMuzzleDirection.xPos), (player.y+gunMuzzleDirection.yPos), 'bullet').setDisplaySize(50, 50).setAngle(bulletAngle);
@@ -302,8 +311,8 @@ const config = {
         }
       }else if(this.currentPlayerDirection=='left' || this.currentPlayerDirection=='right') {
         if(this.currentPlayerDirection=='left' ){
-            gunMuzzleDirection.xPos = 110;
-            gunMuzzleDirection.yPos = 120;
+            gunMuzzleDirection.xPos = -130;
+            gunMuzzleDirection.yPos = -50;
             bullet = this.physics.add.image((player.x+gunMuzzleDirection.xPos), (player.y+gunMuzzleDirection.yPos), 'bullet').setDisplaySize(50, 50).setAngle(bulletAngle);
             bullet.body.onWorldBounds = true;
             bullets.add(bullet);
@@ -337,11 +346,11 @@ const config = {
 
         // 애니메이션 실행 중일 때만 충돌 감지 네모형태 히트박스 생성
         // hitBox의 위치를 업데이트합니다.
-        //hitBox.setPosition(player.x -110, player.y - 120);
         console.log("knifeHitBoxCalculatePosition.xPos: "+knifeHitBoxCalculatePosition.xPos+"knifeHitBoxCalculatePosition.yPos"+knifeHitBoxCalculatePosition.yPos);
         knifeHitBox.x = player.x +knifeHitBoxCalculatePosition.xPos;
         knifeHitBox.y = player.y +knifeHitBoxCalculatePosition.yPos;
-        graphics.generateTexture();
+        //graphics.fillStyle(0xff0000, 1);
+        //graphics.generateTexture();
         
       }else {
         
