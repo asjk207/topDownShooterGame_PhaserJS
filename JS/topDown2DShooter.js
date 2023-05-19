@@ -2,7 +2,9 @@
 
 // 최근 진행상황
 /* 1. 작업 목표
-      (1) 강화학습 에이젼트가 이동하고 칼을 휘두르게 하기.
+      (1) 코드 리팩토링 하기.
+          - 함수화
+      (2) 강화학습 에이젼트가 이동하고 칼을 휘두르게 하기.
 */
 /* 2. 버그
       
@@ -127,19 +129,12 @@ const config = {
     graphics = this.add.graphics();
     //graphics.fillStyle(0xff0000, 1);
     graphics.fillRect(0, 0, 220, 100);
-   
-    //generateTexture는 Graphics 객체가 변경되도 업데이트 되지 않는다.
-    //generateCanvasTexture는 Graphics 객체가 변경되면 업데이트 한다.
-    //console.log(graphics);
+
     knifeHitBox = this.physics.add.sprite(10, 10, graphics.generateTexture());
+    // 히트박스 투명화
     //knifeHitBox.setAlpha(0);
     //graphics.destroy();
     
-
-    //graphics.generateTexture('coloredRect', 220, 100);
-    
-
-    //this.hitBox.setFillStyle(0xff0000, 0.5);
 
     // enemy Knifee Attack Animation
     
