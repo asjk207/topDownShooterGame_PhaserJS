@@ -43,8 +43,14 @@ const config = {
 
   //bullet 상태 변수
   const maxBullets = 20;
+  const bulletVellocity = 700;
   let canFire = true;
   let bulletAngle;
+  let gunMuzzleDirection = {
+    xPos:-130,
+    yPos:-50
+  }
+
 
   //knife 상태 변수
   let doingKnifeAttack = false;
@@ -217,50 +223,13 @@ const config = {
       }, 500); // set the time to 500ms
 
       //console.log((player.x-130)+"..."+ (player.y));
-      let gunMuzzleDirection = {
-        xPos:-130,
-        yPos:-50
-      }
-
+      
+      bullet = this.physics.add.image((player.x+gunMuzzleDirection.xPos), (player.y+gunMuzzleDirection.yPos), 'bullet').setDisplaySize(50, 50).setAngle(bulletAngle);
+      bullet.body.onWorldBounds = true;
+      bullets.add(bullet);
+      bulletDirectionSet(bullet);
       // 총알 이미지의 각도가 바뀌지 않는다 왜??
-      if(currentPlayerDirection=='up' || currentPlayerDirection=='down') {
-        if(currentPlayerDirection=='up' ){
-            gunMuzzleDirection.xPos = 50;
-            gunMuzzleDirection.yPos = -130;
-            bullet = this.physics.add.image((player.x+gunMuzzleDirection.xPos), (player.y+gunMuzzleDirection.yPos), 'bullet').setDisplaySize(50, 50).setAngle(bulletAngle);
-            bullet.body.onWorldBounds = true;
-            bullets.add(bullet);
-            bullet.setVelocityY(-700);
-        }else if(currentPlayerDirection=='down' ){
-            gunMuzzleDirection.xPos = -50;
-            gunMuzzleDirection.yPos = 130;
-            bullet = this.physics.add.image((player.x+gunMuzzleDirection.xPos), (player.y+gunMuzzleDirection.yPos), 'bullet').setDisplaySize(50, 50).setAngle(bulletAngle);
-            bullet.body.onWorldBounds = true;
-            bullets.add(bullet);
-            bullet.setVelocityY(700);
-        }
-      }else if(currentPlayerDirection=='left' || currentPlayerDirection=='right') {
-        if(currentPlayerDirection=='left' ){
-            gunMuzzleDirection.xPos = -130;
-            gunMuzzleDirection.yPos = -50;
-            bullet = this.physics.add.image((player.x+gunMuzzleDirection.xPos), (player.y+gunMuzzleDirection.yPos), 'bullet').setDisplaySize(50, 50).setAngle(bulletAngle);
-            bullet.body.onWorldBounds = true;
-            bullets.add(bullet);
-            bullet.setVelocityX(-700);
-        }else if(currentPlayerDirection=='right' ){
-            gunMuzzleDirection.xPos = 130;
-            gunMuzzleDirection.yPos = 50;
-            bullet = this.physics.add.image((player.x+gunMuzzleDirection.xPos), (player.y+gunMuzzleDirection.yPos), 'bullet').setDisplaySize(50, 50).setAngle(bulletAngle);
-            bullet.body.onWorldBounds = true;
-            bullets.add(bullet);
-            bullet.setVelocityX(700);
-        }
-      }else{
-        bullet = this.physics.add.image((player.x+gunMuzzleDirection.xPos), (player.y+gunMuzzleDirection.yPos), 'bullet').setDisplaySize(50, 50).setAngle(bulletAngle);
-        bullet.body.onWorldBounds = true;
-        bullets.add(bullet);
-        bullet.setVelocityX(-700);
-      }
+      
       //console.log(bullets);
       //console.log(bullet);
       //console.log(gunMuzzleDirection);
@@ -309,41 +278,35 @@ function directionSet(cursurKey){
     currentVelocity = -250;
 
     // 칼 히트박스 위치
-    knifeHitBoxCalculatePosition.xPos = -150;
-    knifeHitBoxCalculatePosition.yPos = -20;
-    
-    bulletAngle = currentAngle;
-    //this.bulletVelocity = currentVelocity;
+    knifeDirectionSet(-150, -20);
+    // 총구 및 총알 방향 설정
+    gunDirectionSet(currentAngle, -130, -50);
     
     // 현재 플레이어가 가리키는 방향표시.
     currentPlayerDirection='left';
 
-    playerMove(currentAngle, currentVelocity, );
+    playerMove(currentAngle, currentVelocity);
+
   } else if (cursurKey.right.isDown) {
     currentAngle = 0;
     currentVelocity = 250;
 
     // 칼 히트박스 위치
-    knifeHitBoxCalculatePosition.xPos = 150;
-    knifeHitBoxCalculatePosition.yPos = 20;
-
-    bulletAngle = currentAngle;
-    //this.bulletVelocity = currentVelocity;
+    knifeDirectionSet(150, 20);
+    // 총구 및 총알 방향 설정
+    gunDirectionSet(currentAngle, 130, 50);
 
     currentPlayerDirection='right';
 
     playerMove(currentAngle, currentVelocity);
-  }
-  if (cursurKey.up.isDown) {
+  } if (cursurKey.up.isDown) {
     currentAngle = 270;
     currentVelocity = -250;
 
     // 칼 히트박스 위치
-    knifeHitBoxCalculatePosition.xPos = -110;
-    knifeHitBoxCalculatePosition.yPos = -120;
-
-    bulletAngle = currentAngle;
-    //this.bulletVelocity = currentVelocity;
+    knifeDirectionSet(-110, -120);
+    // 총구 및 총알 방향 설정
+    gunDirectionSet(currentAngle, 50, -130);
     
     currentPlayerDirection='up';
     
@@ -353,12 +316,9 @@ function directionSet(cursurKey){
     currentVelocity = 250;
 
     // 칼 히트박스 위치
-    knifeHitBoxCalculatePosition.xPos = 110;
-    knifeHitBoxCalculatePosition.yPos = 120;
-
-    bulletAngle = currentAngle;
-    
-   // this.bulletVelocity = currentVelocity;
+    knifeDirectionSet(110, 120);
+    // 총구 및 총알 방향 설정
+    gunDirectionSet(currentAngle, -50, 130);
     
     currentPlayerDirection='down';
     
@@ -376,10 +336,32 @@ function playerMove(currentAngle, currentVelocity){
   }
 }
 
-function gunSet(){
-
+function gunDirectionSet(angle, xPos, yPos){
+  bulletAngle = angle;
+  gunMuzzleDirection.xPos = xPos;
+  gunMuzzleDirection.yPos = yPos;
 }
 
-function knifeSet() {
+function bulletDirectionSet(bullet){
+  if(currentPlayerDirection=='up' || currentPlayerDirection=='down') {
+    if(currentPlayerDirection=='up' ){
+       
+        bullet.setVelocityY(-bulletVellocity);
+    }else if(currentPlayerDirection=='down' ){
+        bullet.setVelocityY(bulletVellocity);
+    }
+  }else if(currentPlayerDirection=='left' || currentPlayerDirection=='right') {
+    if(currentPlayerDirection=='left' ){
+        bullet.setVelocityX(-bulletVellocity);
+    }else if(currentPlayerDirection=='right' ){
+        bullet.setVelocityX(bulletVellocity);
+    }
+  }else{
+    bullet.setVelocityX(-bulletVellocity);
+  }
+}
 
+function knifeDirectionSet(xPos, yPos) {
+  knifeHitBoxCalculatePosition.xPos = xPos;
+  knifeHitBoxCalculatePosition.yPos = yPos;
 }
